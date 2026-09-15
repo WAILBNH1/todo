@@ -1,6 +1,7 @@
 const inp = document.getElementById("inp");
 const btn = document.getElementById("btn");
 const result = document.getElementById("result");
+const dll = document.getElementById("dll");
 
 let list = JSON.parse(localStorage.getItem("list")) || [];
 
@@ -53,6 +54,37 @@ btn.addEventListener("click", () => {
 inp.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     btn.click();
+  }
+});
+
+let isConfirming = false;
+let intervalId = null;
+
+function resetBtn() {
+  clearInterval(intervalId);
+  isConfirming = false;
+  dll.textContent = "Delete All";
+}
+
+dll.addEventListener("click", () => {
+  if (!isConfirming) {
+    isConfirming = true;
+    let seconds = 3;
+    dll.textContent = `Are you sure? (${seconds}s)`;
+
+    intervalId = setInterval(() => {
+      seconds--;
+      if (seconds > 0) {
+        dll.textContent = `Are you sure? (${seconds}s)`;
+      } else {
+        resetBtn();
+      }
+    }, 1000);
+  } else {
+    list = [];
+    save();
+    display();
+    resetBtn();
   }
 });
 
