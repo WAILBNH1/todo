@@ -30,8 +30,43 @@ function display() {
       display();
     });
 
+    const editBtn = document.createElement("button");
+    editBtn.classList.add("edit-btn"); // إضافة كلاس الـ CSS
+    editBtn.textContent = "Edit";
+
+    editBtn.addEventListener("click", () => {
+      const inpe = document.createElement("input");
+      inpe.type = "text";
+      inpe.value = item.text;
+      taskDiv.replaceChild(inpe, label);
+
+      inpe.focus();
+
+      inpe.addEventListener("blur", () => {
+        const newText = inpe.value.trim();
+        if (newText !== "") {
+          item.text = newText;
+          save();
+        }
+        display();
+      });
+
+      inpe.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          inpe.blur();
+        }
+      });
+    });
+
+    // حاوية للأزرار لضمان محاذاتها بـ CSS
+    const btnContainer = document.createElement("div");
+    btnContainer.classList.add("btn-container");
+    btnContainer.appendChild(editBtn);
+    btnContainer.appendChild(deleteBtn);
+
     taskDiv.appendChild(label);
-    taskDiv.appendChild(deleteBtn);
+    taskDiv.appendChild(btnContainer);
     result.appendChild(taskDiv);
   });
 }
