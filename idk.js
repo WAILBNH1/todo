@@ -3,6 +3,7 @@ const btn = document.getElementById("btn");
 const result = document.getElementById("result");
 const dll = document.getElementById("dll");
 
+// القائمة تبدأ فارغة أو تأخذ البيانات المحفوظة سابقاً
 let list = JSON.parse(localStorage.getItem("list")) || [];
 
 function save() {
@@ -11,6 +12,18 @@ function save() {
 
 function display() {
   result.innerHTML = "";
+
+  // 1. حالة القائمة الفارغة (No tasks yet)
+  if (list.length === 0) {
+    const emptyMsg = document.createElement("p");
+    emptyMsg.textContent = "No tasks yet!";
+    emptyMsg.style.color = "rgba(255, 255, 255, 0.5)";
+    emptyMsg.style.fontSize = "20px";
+    emptyMsg.style.marginTop = "20px";
+    emptyMsg.style.fontWeight = "bold";
+    result.appendChild(emptyMsg);
+    return; // خروج مبكر لتوقف الرسم
+  }
 
   list.forEach((item) => {
     const taskDiv = document.createElement("div");
@@ -31,7 +44,7 @@ function display() {
     });
 
     const editBtn = document.createElement("button");
-    editBtn.classList.add("edit-btn"); // إضافة كلاس الـ CSS
+    editBtn.classList.add("edit-btn");
     editBtn.textContent = "Edit";
 
     editBtn.addEventListener("click", () => {
@@ -42,7 +55,11 @@ function display() {
 
       inpe.focus();
 
+      let isCancelled = false;
+
       inpe.addEventListener("blur", () => {
+        if (isCancelled) return;
+
         const newText = inpe.value.trim();
         if (newText !== "") {
           item.text = newText;
@@ -51,15 +68,19 @@ function display() {
         display();
       });
 
+      // 2. إلغاء التعديل باستخدام Esc ودعم Enter
       inpe.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
           inpe.blur();
+        } else if (e.key === "Escape") {
+          isCancelled = true;
+          display();
         }
       });
     });
 
-    // حاوية للأزرار لضمان محاذاتها بـ CSS
+    // حاوية الأزرار لمنع تغير الحجم والـ Shift في التصميم
     const btnContainer = document.createElement("div");
     btnContainer.classList.add("btn-container");
     btnContainer.appendChild(editBtn);
@@ -101,6 +122,7 @@ function resetBtn() {
   dll.textContent = "Delete All";
 }
 
+// 3. عداد زمني للتأكد عند حذف الكل
 dll.addEventListener("click", () => {
   if (!isConfirming) {
     isConfirming = true;
