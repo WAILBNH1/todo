@@ -15,7 +15,7 @@ body {
   font-family: "Poppins", sans-serif;
 }
 
-/* الكارت الرئيسي */
+/* الكارت الرئيسي - ظهور تدريجي مع صعود خفيف */
 #card {
   display: flex;
   flex-direction: column;
@@ -32,6 +32,18 @@ body {
   max-width: 480px;
   max-height: 85vh;
   scrollbar-gutter: stable;
+  animation: cardAppear 0.6s ease-out forwards;
+}
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 #card h1 {
@@ -91,6 +103,11 @@ body {
 
 .add:hover {
   background: rgba(255, 255, 255, 0.35);
+  transform: scale(1.05);
+}
+
+.add:active {
+  transform: scale(0.95);
 }
 
 /* شريط أزرار التصفية والبحث */
@@ -112,21 +129,21 @@ body {
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(5px);
 }
 
 .filter-btn:hover,
 #search:hover {
   background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .filter-btn.active,
 .active-search {
   background: rgba(76, 175, 80, 0.6) !important;
   border-color: #4caf50 !important;
-  box-shadow: 0 2px 10px rgba(76, 175, 80, 0.3);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
   font-weight: 600;
 }
 
@@ -156,7 +173,7 @@ body {
   border-radius: 10px;
 }
 
-/* بطاقة المهمة الفردية */
+/* بطاقة المهمة الفردية وحركة ظهورها */
 .taskdiv {
   display: flex;
   align-items: center;
@@ -169,15 +186,28 @@ body {
   margin: 6px 0;
   padding: 0 8px 0 12px;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
+  animation: taskSlideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes taskSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-15px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
 .taskdiv:hover {
   background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
 }
 
-/* زر إتمام المهمة */
+/* زر إتمام المهمة مع تأثير نبض عابر عند الضغط */
 .check-btn {
   width: 24px;
   height: 24px;
@@ -192,18 +222,32 @@ body {
   justify-content: center;
   margin-right: 12px;
   flex-shrink: 0;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .check-btn:hover {
   border-color: #4caf50;
   background: rgba(76, 175, 80, 0.2);
+  transform: scale(1.1);
 }
 
 .check-btn.completed-btn {
   background: #4caf50;
   border-color: #4caf50;
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+  animation: pulse 0.3s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* نص المهمة وإدخال التعديل */
@@ -220,6 +264,9 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  transition:
+    opacity 0.2s ease,
+    text-decoration 0.2s ease;
 }
 
 .taskdiv input[type="text"] {
@@ -258,6 +305,7 @@ body {
 
 .edit-btn:hover {
   background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
 }
 
 .delete-btn {
@@ -269,6 +317,7 @@ body {
 .delete-btn:hover {
   background: rgba(244, 67, 54, 0.6);
   color: white;
+  transform: translateY(-1px);
 }
 
 /* زر حذف الكل */
@@ -291,5 +340,10 @@ body {
   background: rgba(244, 67, 54, 0.7);
   border-color: rgba(244, 67, 54, 0.8);
   color: white;
-  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+  transform: translateY(-1px);
+}
+
+#dll:active {
+  transform: translateY(1px);
 }
