@@ -2,6 +2,8 @@ const inp = document.getElementById("inp");
 const btn = document.getElementById("btn");
 const result = document.getElementById("result");
 const dll = document.getElementById("dll");
+const filter = document.getElementById("filter");
+const search = document.getElementById("search");
 
 // القائمة تبدأ فارغة أو تأخذ البيانات المحفوظة سابقاً
 let list = JSON.parse(localStorage.getItem("list")) || [];
@@ -10,28 +12,109 @@ function save() {
   localStorage.setItem("list", JSON.stringify(list));
 }
 
+let flstat = "All";
+filter.classList.add("filter-btn");
+
+filter.addEventListener("click", () => {
+  if (flstat === "All") {
+    flstat = "Completed";
+    filter.textContent = "Completed";
+  } else if (flstat === "Completed") {
+    flstat = "NCompleted";
+    filter.textContent = "Not Completed";
+  } else {
+    flstat = "All";
+    filter.textContent = "All";
+  }
+  display();
+});
+
+let srstat = false;
+search.addEventListener("click", () => {
+  srstat = !srstat;
+
+  if (srstat) {
+    search.classList.add("active-search");
+    inp.placeholder = "Search tasks";
+    inp.focus();
+  } else {
+    search.classList.remove("active-search");
+    inp.placeholder = "Add a new task";
+    inp.value = "";
+  }
+  display();
+});
+
+// البحث الفوري أثناء الكتابة
+inp.addEventListener("input", () => {
+  display();
+});
+
+// دالة العرض الرئيسية
 function display() {
   result.innerHTML = "";
+  const query = inp.value.trim().toLowerCase();
 
-  // 1. حالة القائمة الفارغة (No tasks yet)
-  if (list.length === 0) {
+  const filteredlist = list.filter((item) => {
+    // تصفية الحالة (All / Completed / Not Completed)
+    let statusMatch = true;
+    if (flstat === "Completed") statusMatch = item.completed;
+    if (flstat === "NCompleted") statusMatch = !item.completed;
+
+    // تصفية البحث (تنفيذ البحث فقط إذا كان زر البحث مفعلاً)
+    let searchMatch = true;
+    if (srstat && query !== "") {
+      searchMatch = item.text.toLowerCase().includes(query);
+    }
+
+    return statusMatch && searchMatch;
+  });
+
+  if (filteredlist.length === 0) {
     const emptyMsg = document.createElement("p");
-    emptyMsg.textContent = "No tasks yet!";
+    emptyMsg.textContent =
+      list.length === 0 ? "No tasks yet!" : "No tasks found!";
     emptyMsg.style.color = "rgba(255, 255, 255, 0.5)";
     emptyMsg.style.fontSize = "20px";
     emptyMsg.style.marginTop = "20px";
     emptyMsg.style.fontWeight = "bold";
     result.appendChild(emptyMsg);
-    return; // خروج مبكر لتوقف الرسم
+    return;
   }
 
-  list.forEach((item) => {
+  filteredlist.forEach((item) => {
     const taskDiv = document.createElement("div");
     taskDiv.classList.add("taskdiv");
 
+    // إنشاء زر الـ Checkmark
+    const checkBtn = document.createElement("button");
+    checkBtn.classList.add("check-btn");
+    checkBtn.textContent = item.completed ? "✓" : "";
+    if (item.completed) {
+      checkBtn.classList.add("completed-btn");
+    }
+
+    checkBtn.addEventListener("click", () => {
+      item.completed = !item.completed;
+      save();
+      display();
+    });
+
+    // إنشاء عنصر الـ Label
     const label = document.createElement("label");
     label.classList.add("task");
     label.textContent = item.text;
+    label.addEventListener("click", () => {
+      item.completed = !item.completed;
+      save();
+      display();
+    });
+
+    // تطبيق التنسيق إذا كانت المهمة مكتملة
+    if (item.completed) {
+      label.style.textDecoration = "line-through";
+      label.style.opacity = "0.6";
+    }
 
     const deleteBtn = document.createElement("button");
     deleteBtn.classList.add("delete-btn");
@@ -68,7 +151,6 @@ function display() {
         display();
       });
 
-      // 2. إلغاء التعديل باستخدام Esc ودعم Enter
       inpe.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
@@ -80,12 +162,12 @@ function display() {
       });
     });
 
-    // حاوية الأزرار لمنع تغير الحجم والـ Shift في التصميم
     const btnContainer = document.createElement("div");
     btnContainer.classList.add("btn-container");
     btnContainer.appendChild(editBtn);
     btnContainer.appendChild(deleteBtn);
 
+    taskDiv.appendChild(checkBtn);
     taskDiv.appendChild(label);
     taskDiv.appendChild(btnContainer);
     result.appendChild(taskDiv);
@@ -98,6 +180,7 @@ btn.addEventListener("click", () => {
     const task = {
       id: Date.now(),
       text: value,
+      completed: false,
     };
     list.push(task);
     save();
@@ -122,7 +205,6 @@ function resetBtn() {
   dll.textContent = "Delete All";
 }
 
-// 3. عداد زمني للتأكد عند حذف الكل
 dll.addEventListener("click", () => {
   if (!isConfirming) {
     isConfirming = true;
@@ -138,10 +220,17 @@ dll.addEventListener("click", () => {
       }
     }, 1000);
   } else {
-    list = [];
+    if (flstat === "Completed") {
+      list = list.filter((item) => !item.completed);
+    } else if (flstat === "NCompleted") {
+      list = list.filter((item) => item.completed);
+    } else {
+      list = [];
+    }
+
+    resetBtn();
     save();
     display();
-    resetBtn();
   }
 });
 
